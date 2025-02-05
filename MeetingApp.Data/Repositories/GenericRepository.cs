@@ -35,6 +35,11 @@ namespace MeetingApp.Data.Repositories
             _dbSet.Remove(entity);
         }
 
+        public void RemoveRange(List<T> list)
+        {
+            _dbSet.RemoveRange(list);
+        }
+
         public T Update(T entity)
         {
             _context.Entry(entity).State = EntityState.Modified;

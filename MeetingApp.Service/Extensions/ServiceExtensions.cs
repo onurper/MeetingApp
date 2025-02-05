@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Hangfire;
 using static MeetingApp.Core.DTOs.TokenOption;
 
 namespace MeetingApp.Service.Extensions;
@@ -22,6 +23,7 @@ public static class ServiceExtensions
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<IMeetingService, MeetingService>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+        services.AddScoped<MeetingCleanupService>();
 
         services.AddScoped<ITokenService, TokenService>();
         services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
@@ -79,9 +81,19 @@ public static class ServiceExtensions
             });
         });
 
+        services.AddHangfire(config =>
+            config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(configuration.GetConnectionString("SqlServer")));
+
+        services.AddHangfireServer();
+
         services.AddScoped<FileService>();
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
+
+
 
         return services;
     }

@@ -17,13 +17,11 @@ public class AuthenticationService(IUserRepository userRepository, IUnitOfWork u
 
         var user = await userRepository.Where(x => x.Email == loginDto.Email).FirstOrDefaultAsync();
 
-        //var user = await _userManager.FindByEmailAsync(loginDto.Email);
-
-        if (user == null) return ServiceResult<TokenDto>.Fail("Email or Password is wrong", HttpStatusCode.NotFound);
+        if (user == null) return ServiceResult<TokenDto>.Fail("Eposta veya parola hatalı", HttpStatusCode.NotFound);
 
         var result = passwordHasher.VerifyHashedPassword(user, user.Password, loginDto.Password);
 
-        if (result == PasswordVerificationResult.Failed) return ServiceResult<TokenDto>.Fail("Email or Password is wrong", HttpStatusCode.NotFound);
+        if (result == PasswordVerificationResult.Failed) return ServiceResult<TokenDto>.Fail("Eposta veya parola hatalı", HttpStatusCode.NotFound);
 
         var token = tokenService.CreateToken(user);
 

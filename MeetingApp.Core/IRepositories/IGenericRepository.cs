@@ -14,6 +14,8 @@ namespace MeetingApp.Core.IRepositories
 
         void Remove(TEntity entity);
 
+        void RemoveRange(List<TEntity> list);
+
         TEntity Update(TEntity entity);
     }
 }
