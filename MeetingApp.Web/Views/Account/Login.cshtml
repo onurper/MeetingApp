@@ -3,21 +3,27 @@
 }
 
 @model MeetingApp.Web.ViewModels.LoginViewModel
+<br />
+<h5 class="display-6 text-center">Giriş</h5>
+<br />
+<div class="container d-flex justify-content-center">
+    <div class="col-md-4 col-sm-6 col-10">
+        <form method="post" asp-controller="Account" asp-action="Login">
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">Eposta</label>
+                <input type="email" class="form-control" asp-for="Email">
+                <span class="text-danger" asp-validation-for="Email"></span>
 
-<h3 class="display-5 text-center">Giriş Yap</h3>
-
-<div class="container-fluid">
-    <form method="post" asp-controller="Account" asp-action="Login">
-        <div class="mb-3">
-            <label asp-for="Email" class="form-label">Eposta</label>
-            <input type="email" class="form-control" asp-for="Email">
-        </div>
-        <div class="mb-3">
-            <label asp-for="Password" class="form-label">Şifre</label>
-            <input type="password" class="form-control" asp-for="Password">
-        </div>
-        <a href="/Account/Create" class="btn btn-success">Kayıt Ol</a>
-        <button type="submit" class="btn btn-primary">Giriş Yap</button>
-
-    </form>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label">Şifre</label>
+                <input type="password" class="form-control" asp-for="Password">
+                <span class="text-danger" asp-validation-for="Password"></span>
+            </div>
+            <div class="mb-3">
+                <a href="/Account/Register" class="btn btn-success me-3">Kayıt Ol</a>
+                <button type="submit" class="btn btn-primary">Giriş Yap</button>
+            </div>
+        </form>
+    </div>
 </div>

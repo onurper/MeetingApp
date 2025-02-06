@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace MeetingApp.Core.DTOs.UserMeeting;
+namespace MeetingApp.Core.DTOs.Meeting;
 
-public class CreateUserMeetingDto
+public class CreateMeetingDto
 {
     public string Title { get; set; }
     public string Description { get; set; }

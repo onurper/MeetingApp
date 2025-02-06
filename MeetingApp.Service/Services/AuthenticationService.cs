@@ -41,4 +41,30 @@ public class AuthenticationService(IUserRepository userRepository, IUnitOfWork u
 
         return ServiceResult<TokenDto>.Success(token, HttpStatusCode.OK);
     }
+
+    public async Task<ServiceResult<TokenDto>> CreateTokenByRefreshToken(int userId)
+    {
+        var existRefreshToken = await refreshTokenRepository.Where(x => x.UserId == userId.ToString()).SingleOrDefaultAsync();
+
+        if (existRefreshToken == null)
+        {
+            return ServiceResult<TokenDto>.Fail("Refresh token not found", HttpStatusCode.NotFound);
+        }
+
+        var user = await userRepository.Where(x => x.Id.ToString() == existRefreshToken.UserId).SingleOrDefaultAsync();
+
+        if (user == null)
+        {
+            return ServiceResult<TokenDto>.Fail("User Id not found", HttpStatusCode.NotFound);
+        }
+
+        var tokenDto = tokenService.CreateToken(user);
+
+        existRefreshToken.Code = tokenDto.RefreshToken;
+        existRefreshToken.Expiration = tokenDto.RefreshTokenExpiration;
+
+        await unitOfWork.SaveChangesAsync();
+
+        return ServiceResult<TokenDto>.Success(tokenDto, HttpStatusCode.OK);
+    }
 }

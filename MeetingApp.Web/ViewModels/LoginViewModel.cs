@@ -1,3 +1,3 @@
 ﻿namespace MeetingApp.Web.ViewModels;
 
-public record LoginViewModel(string Email, string Password);
+public record LoginViewModel(string? Email, string? Password);

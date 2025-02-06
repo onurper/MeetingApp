@@ -1,7 +1,13 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @{
-    var isLoggedIn = Context.Request.Cookies["User"] != null;
+    var image = string.Empty;
+    @if (User.Identity.IsAuthenticated)
+    {
+        image = User.Claims.Where(x => x.Type == "ProfileImage").Select(x => x.Value).FirstOrDefault().Replace("\\", "//");
+    }
 }
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -23,8 +29,7 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-
-                        @if (isLoggedIn)
+                        @if (User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Anasayfa</a>
@@ -34,7 +39,12 @@
                             </li>
                             <li class="nav-item">
                                 <a href="#" class="nav-link text-dark" onclick="document.getElementById('logoutForm').submit();">Çıkış Yap</a>
-
+                            </li>
+                            <li class="nav-item">
+                                <picture>
+                                    <source srcset="https://localhost:7196/@(User.Claims.Where(x => x.Type == "ProfileImage").Select(x => x.Value).FirstOrDefault().Replace("\\", "//"))" type="image/svg+xml">
+                                    <img src="https://localhost:7196/@(User.Claims.Where(x => x.Type == "ProfileImage").Select(x => x.Value).FirstOrDefault().Replace("\\", "//"))" class="img-fluid img-thumbnail" alt="..." style="height: 40px; width:50px">
+                                </picture>
                             </li>
                         }
                         else

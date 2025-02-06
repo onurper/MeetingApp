@@ -1,4 +1,4 @@
-﻿using MeetingApp.Core.DTOs.UserMeeting;
+﻿using MeetingApp.Core.DTOs.Meeting;
 using MeetingApp.Core.IServices;
 using MeetingApp.Service.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -20,7 +20,7 @@ namespace MeetingApp.Api.Controllers
 
         [HttpPost]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> CreateMeeting([FromForm] CreateUserMeetingDto request)
+        public async Task<IActionResult> CreateMeeting([FromForm] CreateMeetingDto request)
         {
             var userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
@@ -28,7 +28,7 @@ namespace MeetingApp.Api.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateMeeting(UpdateUserMeetingDto request, int id) =>
+        public async Task<IActionResult> UpdateMeeting(UpdateMeetingDto request, int id) =>
             ActionResultInstance(await meetingService.UpdateAsync(id, request));
 
         [HttpDelete]

@@ -14,5 +14,12 @@ namespace MeetingApp.Api.Controllers
             var result = await authenticationService.CreateTokenAsync(loginDto);
             return ActionResultInstance(result);
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> CreateTokenByRefreshToken(int id)
+        {
+            var result = await authenticationService.CreateTokenByRefreshToken(id);
+            return ActionResultInstance(result);
+        }
     }
 }

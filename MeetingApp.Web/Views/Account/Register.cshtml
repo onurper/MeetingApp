@@ -1,0 +1,53 @@
+﻿@{
+    ViewData["Title"] = "Kayıt Ol";
+}
+
+@model MeetingApp.Web.ViewModels.CreateUserViewModel
+<br />
+<h3 class="display-6 text-center">Kayıt Ol</h3>
+<br />
+<div class="container d-flex justify-content-center">
+    <div class="col-md-4 col-sm-6 col-10">
+        <form method="post" asp-controller="Account" asp-action="Register" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">İsim *</label>
+                <input type="text" class="form-control" asp-for="Name">
+                <span class="text-danger" asp-validation-for="Name"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Surname" class="form-label">Soyisim *</label>
+                <input type="text" class="form-control" asp-for="Surname">
+                <span class="text-danger" asp-validation-for="Surname"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">Eposta *</label>
+                <input type="email" class="form-control" asp-for="Email">
+                <span class="text-danger" asp-validation-for="Email"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label">Şifre *</label>
+                <input type="password" class="form-control" asp-for="Password">
+                <span class="text-danger" asp-validation-for="Password"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Phone" class="form-label">Telefon *</label>
+                <input type="tel" class="form-control" asp-for="Phone">
+                <span class="text-danger" asp-validation-for="Phone"></span>
+                <small class="text-muted">
+                    Lütfen telefon numaranızı aşağıdaki formatlarda giriniz: <br>
+                    - Türkiye: <strong>+905551234567</strong> veya <strong>05551234567</strong> <br>
+                    Boşluk ve özel karakter (örn. `-`, `()`) kullanmayın.
+                </small>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ProfileImageFile" class="form-label">Telefon *</label>
+                <input type="file" class="form-control" asp-for="ProfileImageFile" accept="image/*">
+                <span class="text-danger" asp-validation-for="ProfileImageFile"></span>
+            </div>
+            <div class="mb-3">
+                <a href="/Account/Login" class="btn btn-success me-3">Giriş Sayfasına Git</a>
+                <button type="submit" class="btn btn-primary">Kayıt Ol</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -36,7 +36,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseExceptionHandler(x => { });
-
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

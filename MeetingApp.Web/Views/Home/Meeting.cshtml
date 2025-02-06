@@ -2,7 +2,7 @@
     ViewData["Title"] = "Toplantı Oluştur";
 }
 
-@model List<UserMeetingDto>
+@model List<MeetingDto>
 
 <div class="container">
     <a asp-controller="Home" asp-action="CreateMeeting" class="btn btn-outline-success">Toplantı Oluştur</a>
@@ -37,7 +37,7 @@
                         <td>@item.Description</td>
                         <td>@item.StartDate</td>
                         <td>@item.EndDate</td>
-                        <td><a href="@item.DocumentPath" class="btn btn-secondary btn-sm">Doküman İndir</a></td>
+                        <td><a href="https://localhost:7196/@item.DocumentPath" class="btn btn-secondary btn-sm">Doküman İndir</a></td>
                         <td><button type="button" class="btn btn-danger btn-sm cancel-btn" data-id="@item.Id" @(!item.Status ? "disabled" : "")>İptal Et</button>
                         </td>
                     </tr>

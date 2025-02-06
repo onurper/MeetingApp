@@ -1,9 +1,12 @@
 using FluentValidation;
 using MeetingApp.Web.Models;
 using MeetingApp.Web.ViewModels;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Net;
+using System.Security.Claims;
 using System.Text;
 
 namespace MeetingApp.Web.Controllers
@@ -17,8 +20,10 @@ namespace MeetingApp.Web.Controllers
 
         public async Task<IActionResult> Meeting()
         {
-            if (Request.Cookies["User"] == null)
+            if (User.Identity == null || !User.Identity.IsAuthenticated)
+            {
                 return RedirectToAction("Index", "Home");
+            }
 
             var client = clientFactory.CreateClient();
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + Request.Cookies["User"]);
@@ -27,15 +32,36 @@ namespace MeetingApp.Web.Controllers
 
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
-                return RedirectToAction("Logout", "Account");
+                var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                response = await client.GetAsync($"https://localhost:7196/api/Auth/{userId}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    return RedirectToAction("Login", "Account");
+                }
+
+                var resultJson = await response.Content.ReadAsStringAsync();
+                var tokenResult = JsonConvert.DeserializeObject<ServiceResult<TokenDto>>(resultJson)!;
+
+                HttpContext.Response.Cookies.Append("User", tokenResult.Data!.AccessToken, new CookieOptions { Expires = DateTime.Now.AddHours(24) });
+
+                client.DefaultRequestHeaders.Remove("Authorization");
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokenResult.Data!.AccessToken);
+                response = await client.GetAsync("https://localhost:7196/api/Meetings");
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    return RedirectToAction("Logout", "Account"); // Hala yetkilendirme hatasý varsa çýkýþ yap
+                }
             }
 
             var resultJsonData = await response.Content.ReadAsStringAsync();
-            var values = JsonConvert.DeserializeObject<ServiceResult<List<UserMeetingDto>>>(resultJsonData)!;
+            var values = JsonConvert.DeserializeObject<ServiceResult<List<MeetingDto>>>(resultJsonData)!;
 
-            List<UserMeetingDto> userMeetings = values.Data;
-
-            return View(userMeetings);
+            List<MeetingDto> meetings = values.Data;
+            return View(meetings);
         }
 
         public IActionResult CreateMeeting()
@@ -46,7 +72,7 @@ namespace MeetingApp.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateMeeting(CreateMeetingViewModel request)
         {
-            if (Request.Cookies["User"] == null)
+            if (User.Identity != null && !User.Identity.IsAuthenticated)
                 return RedirectToAction("Index", "Home");
 
             var validationResult = await validator.ValidateAsync(request);
@@ -102,7 +128,8 @@ namespace MeetingApp.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> CancelMeeting(int id)
         {
-            if (Request.Cookies["User"] == null) return RedirectToAction("Login", "Account");
+            if (!User.Identity.IsAuthenticated)
+                return RedirectToAction("Index", "Home");
 
             var client = clientFactory.CreateClient();
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + Request.Cookies["User"]);

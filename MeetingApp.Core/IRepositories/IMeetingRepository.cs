@@ -2,6 +2,6 @@
 
 namespace MeetingApp.Core.IRepositories;
 
-public interface IMeetingRepository : IGenericRepository<UserMeeting>
+public interface IMeetingRepository : IGenericRepository<Meeting>
 {
 }

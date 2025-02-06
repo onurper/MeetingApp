@@ -8,7 +8,7 @@ public class MeetingDbContext : DbContext
     {
     }
 
-    public DbSet<UserMeeting> Meetings { get; set; } = default!;
+    public DbSet<Meeting> Meetings { get; set; } = default!;
     public DbSet<User> Users { get; set; } = default!;
     public DbSet<UserRefreshToken> UserRefreshTokens { get; set; } = default!;
     public DbSet<DeletedMeetings> DeletedMeetings { get; set; } = default!;

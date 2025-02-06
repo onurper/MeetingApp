@@ -4,8 +4,8 @@
 @model CreateMeetingViewModel
 
 @{
-    var defaultStartDate = DateTime.Now.ToString("yyyy-MM-ddTHH:mm"); // HTML için uygun format
-    var defaultEndDate = DateTime.Now.AddHours(1).ToString("yyyy-MM-ddTHH:mm");
+    var defaultStartDate = DateTime.Now.AddHours(1).ToString("yyyy-MM-ddTHH:mm"); // HTML için uygun format
+    var defaultEndDate = DateTime.Now.AddDays(1).AddHours(1).ToString("yyyy-MM-ddTHH:mm");
 }
 
 <h3 class="display-5 text-center">Toplantı Oluştur</h3>

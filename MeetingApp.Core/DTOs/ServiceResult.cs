@@ -25,16 +25,6 @@ namespace MeetingApp.Core.DTOs
             };
         }
 
-        public static ServiceResult<T> Success(List<UserMeeting.UserMeetingDto> userMeetingDtos, HttpStatusCode status = HttpStatusCode.OK)
-        {
-            return new ServiceResult<T>()
-            {
-                Data = default,
-                ErrorMessage = default,
-                Status = status
-            };
-        }
-
         public static ServiceResult<T> Fail(List<string> errorMessage,
             HttpStatusCode status = HttpStatusCode.BadRequest)
         {

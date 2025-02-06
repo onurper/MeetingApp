@@ -1,6 +1,6 @@
 ﻿namespace MeetingApp.Core.Models;
 
-public class UserMeeting
+public class Meeting
 {
     public int Id { get; set; }
     public int UserId { get; set; }

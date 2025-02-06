@@ -7,7 +7,8 @@ namespace MeetingApp.Api.Controllers
     public class UsersController(IUserService userService) : PrivateController
     {
         [HttpPost]
-        public async Task<IActionResult> CreateUser(UserDto requestCreateUserDto)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CreateUser([FromForm] UserDto requestCreateUserDto)
         {
             await userService.UserRegister(requestCreateUserDto);
 

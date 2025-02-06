@@ -1,6 +1,6 @@
 ﻿using MeetingApp.Core;
 using MeetingApp.Core.DTOs;
-using MeetingApp.Core.DTOs.UserMeeting;
+using MeetingApp.Core.DTOs.Meeting;
 using MeetingApp.Core.IRepositories;
 using MeetingApp.Core.IServices;
 using MeetingApp.Core.Models;
@@ -12,17 +12,17 @@ namespace MeetingApp.Service.Services;
 
 public class MeetingService(IMeetingRepository meetingRepository, IUnitOfWork unitOfWork, IEmailService emailService, IUserRepository repository, FileService fileService, ILogger<MeetingService> logger) : IMeetingService
 {
-    public async Task<ServiceResult<List<UserMeeting>>> GetAllByUserIdAsync(int id)
+    public async Task<ServiceResult<List<Meeting>>> GetAllByUserIdAsync(int id)
     {
-        var userMeetings = await meetingRepository.Where(x => x.UserId == id).ToListAsync();
+        var meetings = await meetingRepository.Where(x => x.UserId == id).ToListAsync();
 
-        if (userMeetings.Count == 0)
-            return ServiceResult<List<UserMeeting>>.Fail("Kullanıcıya ait toplantı bulunamadı", HttpStatusCode.NotFound);
+        if (meetings.Count == 0)
+            return ServiceResult<List<Meeting>>.Fail("Kullanıcıya ait toplantı bulunamadı", HttpStatusCode.NotFound);
 
-        return ServiceResult<List<UserMeeting>>.Success(userMeetings, HttpStatusCode.OK);
+        return ServiceResult<List<Meeting>>.Success(meetings, HttpStatusCode.OK);
     }
 
-    public async Task<ServiceResult<UserMeeting>> CreateAsync(int userId, CreateUserMeetingDto dto)
+    public async Task<ServiceResult<Meeting>> CreateAsync(int userId, CreateMeetingDto dto)
     {
         var path = string.Empty;
 
@@ -42,7 +42,7 @@ public class MeetingService(IMeetingRepository meetingRepository, IUnitOfWork un
             }
         }
 
-        var userMeeting = new UserMeeting()
+        var meeting = new Meeting()
         {
             UserId = userId,
             Description = dto.Description,
@@ -53,25 +53,25 @@ public class MeetingService(IMeetingRepository meetingRepository, IUnitOfWork un
             Title = dto.Title
         };
 
-        await meetingRepository.AddAsync(userMeeting);
+        await meetingRepository.AddAsync(meeting);
         await unitOfWork.SaveChangesAsync();
 
         #region Toplantı bilgilendirmesi
 
-        //var user = await repository.GetByIdAsync(userMeeting.UserId);
-        //await emailService.SendEmailAsync(user.Email, "Toplantı Bilgilendirmesi", "Toplantı kaydınız oluşturulmuştur.");
+        var user = await repository.GetByIdAsync(meeting.UserId);
+        await emailService.SendEmailAsync(user.Email, "Toplantı Bilgilendirmesi", "Toplantı kaydınız oluşturulmuştur.");
 
         #endregion Toplantı bilgilendirmesi
 
-        return ServiceResult<UserMeeting>.Success(userMeeting, HttpStatusCode.Created);
+        return ServiceResult<Meeting>.Success(meeting, HttpStatusCode.Created);
     }
 
-    public async Task<ServiceResult<UserMeetingDto>> UpdateAsync(int id, UpdateUserMeetingDto dto)
+    public async Task<ServiceResult<MeetingDto>> UpdateAsync(int id, UpdateMeetingDto dto)
     {
         var existMeeting = await meetingRepository.Where(x => x.Id == id).AnyAsync();
 
         if (!existMeeting)
-            return ServiceResult<UserMeetingDto>.Fail("Veri tabanında ilgili toplantı bulunamadı", HttpStatusCode.NotFound);
+            return ServiceResult<MeetingDto>.Fail("Veri tabanında ilgili toplantı bulunamadı", HttpStatusCode.NotFound);
 
         var meeting = await meetingRepository.GetByIdAsync(id)!;
 
@@ -84,7 +84,7 @@ public class MeetingService(IMeetingRepository meetingRepository, IUnitOfWork un
         meetingRepository.Update(meeting);
         await unitOfWork.SaveChangesAsync();
 
-        return ServiceResult<UserMeetingDto>.Success(new UserMeetingDto(meeting.Id, meeting.Title, meeting.UserId, meeting.Status, meeting.Description,
+        return ServiceResult<MeetingDto>.Success(new MeetingDto(meeting.Id, meeting.Title, meeting.UserId, meeting.Status, meeting.Description,
             meeting.DocumentPath, meeting.StartDate, meeting.EndDate), HttpStatusCode.OK);
     }
 

@@ -53,6 +53,7 @@ public class TokenService : ITokenService
     {
         var userList = new List<Claim> {
             new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
+            new Claim("ProfileImage",user.ProfileImagePath),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(ClaimTypes.Name,user.Name),
             new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString())
