@@ -1,4 +1,5 @@
-﻿using MeetingApp.Core.DTOs;
+﻿using Hangfire;
+using MeetingApp.Core.DTOs;
 using MeetingApp.Core.IServices;
 using MeetingApp.Core.Models;
 using MeetingApp.Service.ExceptionHandlers;
@@ -10,7 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-using Hangfire;
 using static MeetingApp.Core.DTOs.TokenOption;
 
 namespace MeetingApp.Service.Extensions;
@@ -19,15 +19,15 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddServiceExt(this IServiceCollection services, IConfiguration configuration)
     {
+        // CORE SERVİSLER (Temel bağımlılıklar)
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<IMeetingService, MeetingService>();
-        services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-        services.AddScoped<MeetingCleanupService>();
+        services.AddScoped<FileService>();
 
+        // AUTHENTICATION & SECURITY (Kimlik doğrulama ve güvenlik)
+        services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<ITokenService, TokenService>();
-        services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
-        services.AddTransient<IEmailService, EmailService>();
         services.Configure<CustomTokenOption>(configuration.GetSection("TokenOption"));
 
         services.AddAuthentication(options =>
@@ -51,11 +51,16 @@ public static class ServiceExtensions
             };
         });
 
+        // EMAIL SERVİSLERİ
+        services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+        services.AddTransient<IEmailService, EmailService>();
+
+        // SWAGGER DOKÜMANTASYONU
         services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Meeting API", Version = "v1" });
 
-            // 🔐 JWT Authentication Ayarları
+            //  JWT Authentication Ayarları
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Description = "JWT kullanmak için 'Bearer {token}' formatında girin.",
@@ -66,21 +71,22 @@ public static class ServiceExtensions
             });
 
             c.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
             {
+                new OpenApiSecurityScheme
                 {
-                    new OpenApiSecurityScheme
+                    Reference = new OpenApiReference
                     {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    new string[] { }
-                }
-            });
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                new string[] { }
+            }
+        });
         });
 
+        // HANGFIRE (Arka Plan İşlemleri)
         services.AddHangfire(config =>
             config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
                 .UseSimpleAssemblyNameTypeSerializer()
@@ -88,12 +94,10 @@ public static class ServiceExtensions
                 .UseSqlServerStorage(configuration.GetConnectionString("SqlServer")));
 
         services.AddHangfireServer();
+        services.AddScoped<MeetingCleanupService>();
 
-        services.AddScoped<FileService>();
-
+        // GLOBAL EXCEPTION HANDLING
         services.AddExceptionHandler<GlobalExceptionHandler>();
-
-
 
         return services;
     }

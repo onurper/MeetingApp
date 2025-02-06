@@ -1,0 +1,23 @@
+﻿@{
+    ViewData["Title"] = "Giriş Yap";
+}
+
+@model MeetingApp.Web.ViewModels.LoginViewModel
+
+<h3 class="display-5 text-center">Giriş Yap</h3>
+
+<div class="container-fluid">
+    <form method="post" asp-controller="Account" asp-action="Login">
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label">Eposta</label>
+            <input type="email" class="form-control" asp-for="Email">
+        </div>
+        <div class="mb-3">
+            <label asp-for="Password" class="form-label">Şifre</label>
+            <input type="password" class="form-control" asp-for="Password">
+        </div>
+        <a href="/Account/Create" class="btn btn-success">Kayıt Ol</a>
+        <button type="submit" class="btn btn-primary">Giriş Yap</button>
+
+    </form>
+</div>

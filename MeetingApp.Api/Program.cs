@@ -13,19 +13,6 @@ builder.Services.AddRepositoryExt(builder.Configuration).AddServiceExt(builder.C
 
 var app = builder.Build();
 
-//using (var scope = app.Services.CreateScope())
-//{
-//    var services = scope.ServiceProvider;
-//    var dbContext = services.GetRequiredService<MeetingDbContext>();
-
-//    //if ((await dbContext.Database.GetPendingMigrationsAsync()).Any())
-//    //{
-//        Console.WriteLine("Migration'lar uygulanıyor...");
-//        await dbContext.Database.MigrateAsync();
-//        Console.WriteLine("Migration'lar başarıyla uygulandı.");
-//    //}
-//}
-
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -45,8 +32,7 @@ using (var scope = app.Services.CreateScope())
     var recurringJobManager = serviceProvider.GetRequiredService<IRecurringJobManager>();
     recurringJobManager.AddOrUpdate(
         "delete-cancelled-meetings",
-        () => meetingCleanupService.DeleteCancelledMeetings(),
-        Cron.Minutely);
+        () => meetingCleanupService.DeleteCancelledMeetings(), Cron.Daily);
 }
 
 app.UseExceptionHandler(x => { });

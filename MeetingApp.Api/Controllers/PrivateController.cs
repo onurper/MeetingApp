@@ -1,4 +1,4 @@
-﻿using MeetingApp.Core;
+﻿using MeetingApp.Core.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MeetingApp.Api.Controllers

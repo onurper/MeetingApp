@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = "Toplantı Oluştur";
+}
+@model CreateMeetingViewModel
+
+@{
+    var defaultStartDate = DateTime.Now.ToString("yyyy-MM-ddTHH:mm"); // HTML için uygun format
+    var defaultEndDate = DateTime.Now.AddHours(1).ToString("yyyy-MM-ddTHH:mm");
+}
+
+<h3 class="display-5 text-center">Toplantı Oluştur</h3>
+
+<div class="container-fluid">
+    <form method="post" asp-controller="Home" asp-action="CreateMeeting" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label">Başlık</label>
+            <input type="text" class="form-control" asp-for="Title">
+            <span class="text-danger" asp-validation-for="Title"></span>
+        </div>
+        
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label">Description</label>
+            <input type="text" class="form-control" asp-for="Description">
+            <span class="text-danger" asp-validation-for="Description"></span>
+        </div>
+        
+        <div class="mb-3">
+            <label asp-for="Document" class="form-label">Doküman</label>
+            <input type="file" class="form-control" asp-for="Document">
+            <span class="text-danger" asp-validation-for="Document"></span>
+
+        </div>
+        
+        <div class="mb-3">
+            <label asp-for="StartDate" class="form-label">Başlangıç Tarihi</label>
+            <input type="datetime-local" class="form-control" value="@defaultStartDate" asp-for="StartDate">
+            <span class="text-danger" asp-validation-for="StartDate"></span>
+
+        </div>
+        
+        <div class="mb-3">
+            <label asp-for="EndDate" class="form-label">Bitiş Tarihi</label>
+            <input type="datetime-local" class="form-control" min="@defaultStartDate" value="@defaultEndDate" asp-for="EndDate">
+            <span class="text-danger" asp-validation-for="EndDate"></span>
+        </div>
+
+        <a href="/Home/Meeting" class="btn btn-success">Toplantı Listesine Dön</a>
+        <button type="submit" class="btn btn-primary">Kaydet</button>
+
+    </form>
+</div>

@@ -1,4 +1,4 @@
-﻿using MeetingApp.Core;
+﻿using MeetingApp.Core.DTOs;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using System.Net;

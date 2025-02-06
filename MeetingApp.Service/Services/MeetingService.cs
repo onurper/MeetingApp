@@ -14,7 +14,12 @@ public class MeetingService(IMeetingRepository meetingRepository, IUnitOfWork un
 {
     public async Task<ServiceResult<List<UserMeeting>>> GetAllByUserIdAsync(int id)
     {
-        return ServiceResult<List<UserMeeting>>.Success(await meetingRepository.Where(x => x.UserId == id).ToListAsync(), HttpStatusCode.OK);
+        var userMeetings = await meetingRepository.Where(x => x.UserId == id).ToListAsync();
+
+        if (userMeetings.Count == 0)
+            return ServiceResult<List<UserMeeting>>.Fail("Kullanıcıya ait toplantı bulunamadı", HttpStatusCode.NotFound);
+
+        return ServiceResult<List<UserMeeting>>.Success(userMeetings, HttpStatusCode.OK);
     }
 
     public async Task<ServiceResult<UserMeeting>> CreateAsync(int userId, CreateUserMeetingDto dto)
@@ -79,7 +84,7 @@ public class MeetingService(IMeetingRepository meetingRepository, IUnitOfWork un
         meetingRepository.Update(meeting);
         await unitOfWork.SaveChangesAsync();
 
-        return ServiceResult<UserMeetingDto>.Success(new UserMeetingDto(meeting.Title, meeting.UserId, meeting.Status, meeting.Description,
+        return ServiceResult<UserMeetingDto>.Success(new UserMeetingDto(meeting.Id, meeting.Title, meeting.UserId, meeting.Status, meeting.Description,
             meeting.DocumentPath, meeting.StartDate, meeting.EndDate), HttpStatusCode.OK);
     }
 
@@ -97,7 +102,7 @@ public class MeetingService(IMeetingRepository meetingRepository, IUnitOfWork un
         meetingRepository.Update(meeting);
         await unitOfWork.SaveChangesAsync();
 
-        return ServiceResult<EmptyDto>.Success(HttpStatusCode.OK);
+        return ServiceResult<EmptyDto>.Success(new EmptyDto(), HttpStatusCode.OK);
     }
 
     public async Task<ServiceResult<EmptyDto>> DeleteAsync(int id)
@@ -112,6 +117,6 @@ public class MeetingService(IMeetingRepository meetingRepository, IUnitOfWork un
         meetingRepository.Remove(meeting);
         await unitOfWork.SaveChangesAsync();
 
-        return ServiceResult<EmptyDto>.Success(HttpStatusCode.NoContent);
+        return ServiceResult<EmptyDto>.Success(new EmptyDto(), HttpStatusCode.NoContent);
     }
 }
