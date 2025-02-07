@@ -1,28 +1,42 @@
 ﻿using FluentValidation;
+using MeetingApp.Web.Constants;
 using MeetingApp.Web.Models;
+using MeetingApp.Web.Services.Interfaces;
 using MeetingApp.Web.ViewModels;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
 namespace MeetingApp.Web.Controllers
 {
-    public class AccountController(IValidator<LoginViewModel> validator, IHttpClientFactory clientFactory, IValidator<CreateUserViewModel> createUserValidator) : Controller
+    [Authorize]
+    public class AccountController : Controller
     {
+        private readonly IValidator<LoginViewModel> _validator;
+        private readonly HttpClient _client;
+        private readonly IValidator<CreateUserViewModel> _createUserValidator;
+        private readonly ICookieAuthService _cookieAuthService;
+
+        public AccountController(IValidator<LoginViewModel> validator, IHttpClientFactory clientFactory, IValidator<CreateUserViewModel> createUserValidator, ICookieAuthService cookieAuthService)
+        {
+            _validator = validator;
+            _client = clientFactory.CreateClient(HttpClientNames.ApiHttpClient);
+            _createUserValidator = createUserValidator;
+            _cookieAuthService = cookieAuthService;
+        }
+
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel request)
         {
-            var result = await validator.ValidateAsync(request);
+            var result = await _validator.ValidateAsync(request);
 
             if (!result.IsValid)
             {
@@ -33,70 +47,30 @@ namespace MeetingApp.Web.Controllers
                 return View(request);
             }
 
-            var client = clientFactory.CreateClient();
-            var jsonData = JsonConvert.SerializeObject(request);
+            await _cookieAuthService.SignInAsync(request, true);
 
-            StringContent content = new(jsonData, Encoding.UTF8, "application/json");
-
-            var response = await client.PostAsync("https://localhost:7196/api/Auth", content);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var resultJsonData = await response.Content.ReadAsStringAsync();
-                var values = JsonConvert.DeserializeObject<ServiceResult<TokenDto>>(resultJsonData);
-
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var token = tokenHandler.ReadJwtToken(values.Data.AccessToken);
-
-                var claims = token.Claims.ToList();
-                claims.Add(new Claim(ClaimTypes.Name, request.Email));
-
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var authProperties = new AuthenticationProperties
-                {
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddHours(24),
-                    IsPersistent = true
-                };
-
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity), authProperties);
-
-                HttpContext.Response.Cookies.Append("User", values.Data.AccessToken, new CookieOptions { Expires = DateTime.Now.AddHours(24) });
-
-                return RedirectToAction("Meeting", "Home");
-            }
-            else
-            {
-                var resultJsonData = await response.Content.ReadAsStringAsync();
-                var values = JsonConvert.DeserializeObject<ServiceResult<EmptyDto>>(resultJsonData);
-
-                foreach (string item in values.ErrorMessage)
-                {
-                    ModelState.AddModelError("", item);
-                }
-
-                return View(request);
-            }
+            return RedirectToAction("GetUserMeetings", "Home");
         }
 
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
+            await _cookieAuthService.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Register()
         {
             return View();
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Register([FromForm] CreateUserViewModel request)
         {
-            var result = await createUserValidator.ValidateAsync(request);
+            var result = await _createUserValidator.ValidateAsync(request);
 
             if (!result.IsValid)
             {
@@ -107,9 +81,6 @@ namespace MeetingApp.Web.Controllers
 
                 return View(request);
             }
-
-            var client = clientFactory.CreateClient();
-            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + Request.Cookies["User"]);
 
             using var multipartContent = new MultipartFormDataContent();
 
@@ -130,7 +101,7 @@ namespace MeetingApp.Web.Controllers
                 }
             }
 
-            var response = await client.PostAsync("https://localhost:7196/api/Users", multipartContent);
+            var response = await _client.PostAsync("https://localhost:7196/api/Users", multipartContent);
 
             if (!response.IsSuccessStatusCode)
             {

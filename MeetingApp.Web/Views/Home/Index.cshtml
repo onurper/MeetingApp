@@ -1,8 +1,58 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "TYS";
 }
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toplantı Yönetim Sistemi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+    <header class="bg-primary text-white text-center py-5">
+        <div class="container">
+            <h1 class="display-4 fw-bold">Toplantı Yönetim Sistemi</h1>
+            <p class="lead">Toplantılarınızı kolayca planlayın, yönetin ve takip edin.</p>
+            <a href="/Home/GetUserMeetings" class="btn btn-light btn-lg">Toplantılarımı Gör</a>
+            <a href="/Home/CreateMeeting" class="btn btn-outline-light btn-lg">Yeni Toplantı Oluştur</a>
+        </div>
+    </header>
+
+    <section class="container text-center my-5">
+        <h2 class="mb-4">Sistemin Özellikleri</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <i class="bi bi-calendar-check fs-1 text-primary"></i>
+                <h4>Toplantı Planla</h4>
+                <p>Yeni toplantılar ekleyerek katılımcılarınızı bilgilendirin.</p>
+            </div>
+            <div class="col-md-4">
+                <i class="bi bi-list-task fs-1 text-primary"></i>
+                <h4>Toplantılarınızı Yönet</h4>
+                <p>Geçmiş ve yaklaşan toplantılarınızı tek ekranda görüntüleyin.</p>
+            </div>
+            <div class="col-md-4">
+                <i class="bi bi-x-circle fs-1 text-primary"></i>
+                <h4>İptal Et</h4>
+                <p>Gereksiz toplantıları hızlıca iptal edin.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-light py-5">
+        <div class="container text-center">
+            <h2>Toplantılarınızı Verimli Hale Getirin</h2>
+            <p class="lead">Toplantılarınızı planlamak ve yönetmek hiç bu kadar kolay olmamıştı.</p>
+            <a href="/Home/CreateMeeting" class="btn btn-primary btn-lg">Yeni Toplantı Oluştur</a>
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white text-center py-3">
+        <p class="mb-0">&copy; 2025 Tüm Hakları Saklıdır | Toplantı Yönetim Sistemi</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
