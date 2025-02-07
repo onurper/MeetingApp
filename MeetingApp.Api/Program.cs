@@ -14,6 +14,21 @@ builder.Services.AddRepositoryExt(builder.Configuration).AddServiceExt(builder.C
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<MeetingDbContext>();
+        context.Database.Migrate();
+        context.EnsureDatabaseSetup();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Migration hatası: {ex.Message}");
+    }
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
