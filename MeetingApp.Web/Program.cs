@@ -24,6 +24,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IValidator<LoginViewModel>, LoginValidator>();
 builder.Services.AddScoped<IValidator<CreateMeetingViewModel>, CreateMeetingViewModelValidator>();
 builder.Services.AddScoped<IValidator<CreateUserViewModel>, CreateUserViewModelValidator>();
+builder.Services.AddScoped<IValidator<UpdateUserViewModel>, UpdateUserViewModelValidator>();
 
 builder.Services.AddAuthentication(auth =>
     {

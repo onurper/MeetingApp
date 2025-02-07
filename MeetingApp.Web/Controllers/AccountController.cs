@@ -19,14 +19,16 @@ namespace MeetingApp.Web.Controllers
         private readonly IValidator<LoginViewModel> _validator;
         private readonly HttpClient _client;
         private readonly IValidator<CreateUserViewModel> _createUserValidator;
+        private readonly IValidator<UpdateUserViewModel> _updateUserValidator;
         private readonly ICookieAuthService _cookieAuthService;
 
-        public AccountController(IValidator<LoginViewModel> validator, IHttpClientFactory clientFactory, IValidator<CreateUserViewModel> createUserValidator, ICookieAuthService cookieAuthService)
+        public AccountController(IValidator<LoginViewModel> validator, IHttpClientFactory clientFactory, IValidator<CreateUserViewModel> createUserValidator, IValidator<UpdateUserViewModel> updateUserValidator, ICookieAuthService cookieAuthService)
         {
             _validator = validator;
             _client = clientFactory.CreateClient(HttpClientNames.ApiHttpClient);
             _createUserValidator = createUserValidator;
             _cookieAuthService = cookieAuthService;
+            _updateUserValidator = updateUserValidator;
         }
 
         [AllowAnonymous]
@@ -136,6 +138,17 @@ namespace MeetingApp.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateUser(UpdateUserViewModel request)
         {
+            var result = await _updateUserValidator.ValidateAsync(request);
+
+            if (!result.IsValid)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+                }
+                return View(nameof(AccountController.Profile), request);
+            }
+
             using var multipartContent = new MultipartFormDataContent();
 
             foreach (var property in request.GetType().GetProperties())
