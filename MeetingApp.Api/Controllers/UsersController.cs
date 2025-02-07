@@ -1,4 +1,6 @@
 ﻿using MeetingApp.Core.DTOs;
+using MeetingApp.Core.DTOs.CreateDto;
+using MeetingApp.Core.DTOs.UpdateDto;
 using MeetingApp.Core.IServices;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,7 +10,7 @@ namespace MeetingApp.Api.Controllers
     {
         [HttpPost]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> CreateUser([FromForm] UserDto requestCreateUserDto)
+        public async Task<IActionResult> CreateUser([FromForm] CreateUserDto requestCreateUserDto)
         {
             await userService.UserRegisterAsync(requestCreateUserDto);
 

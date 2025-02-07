@@ -1,18 +1,21 @@
-﻿using MeetingApp.Core;
+﻿using Azure.Core;
+using MeetingApp.Core;
 using MeetingApp.Core.DTOs;
+using MeetingApp.Core.DTOs.CreateDto;
+using MeetingApp.Core.DTOs.UpdateDto;
 using MeetingApp.Core.IRepositories;
 using MeetingApp.Core.IServices;
 using MeetingApp.Core.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Net;
-using Microsoft.AspNetCore.Mvc;
 
 namespace MeetingApp.Service.Services;
 
 public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork, IPasswordHasher<User> passwordHasher, IEmailService emailService, FileService fileService, ILogger<UserService> logger) : IUserService
 {
-    public async Task<ServiceResult<User>> UserRegisterAsync(UserDto request)
+    public async Task<ServiceResult<UserDto>> UserRegisterAsync(CreateUserDto request)
     {
         var path = string.Empty;
 
@@ -49,7 +52,18 @@ public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork,
 
         _ = emailService.SendEmailAsync(user.Email, "Hoşgeldiniz", "Kayıt işleminiz başarıyla gerçekleştirilmiştir.");
 
-        return ServiceResult<User>.Success(user, HttpStatusCode.Created);
+        UserDto userDto = new(
+
+            user.Id,
+            user.Name,
+            user.Surname,
+            user.Email,
+            user.Phone,
+            user.Password,
+            user.ProfileImagePath
+        );
+
+        return ServiceResult<UserDto>.Success(userDto, HttpStatusCode.Created);
     }
 
     public async Task<ServiceResult<EmptyDto>> UserUpdateAsync(int id, UpdateUserDto request)
@@ -92,12 +106,23 @@ public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork,
     }
 
     [HttpGet]
-    public async Task<ServiceResult<User>> GetUserByIdAsync(int id)
+    public async Task<ServiceResult<UserDto>> GetUserByIdAsync(int id)
     {
         var user = await userRepository.GetByIdAsync(id);
         if (user == null)
-            return ServiceResult<User>.Fail("Kullanıcı bulunamadı.", HttpStatusCode.NotFound);
+            return ServiceResult<UserDto>.Fail("Kullanıcı bulunamadı.", HttpStatusCode.NotFound);
 
-        return ServiceResult<User>.Success(user, HttpStatusCode.OK);
+        UserDto userDto = new(
+
+            user.Id,
+            user.Name,
+            user.Surname,
+            user.Email,
+            user.Phone,
+            user.Password,
+            user.ProfileImagePath
+        );
+
+        return ServiceResult<UserDto>.Success(userDto, HttpStatusCode.OK);
     }
 }
