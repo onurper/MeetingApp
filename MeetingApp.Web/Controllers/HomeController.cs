@@ -5,6 +5,7 @@ using MeetingApp.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.Security.Claims;
 using System.Text;
 
 namespace MeetingApp.Web.Controllers
@@ -32,7 +33,9 @@ namespace MeetingApp.Web.Controllers
 
         public async Task<IActionResult> GetUserMeetings()
         {
-            var response = await _client.GetAsync("https://localhost:7196/api/Meetings");
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var response = await _client.GetAsync($"https://localhost:7196/api/Meetings/{userId}");
 
             var resultJsonData = await response.Content.ReadAsStringAsync();
             var values = JsonConvert.DeserializeObject<ServiceResult<List<MeetingDto>>>(resultJsonData)!;
@@ -78,8 +81,9 @@ namespace MeetingApp.Web.Controllers
                     multipartContent.Add(new StringContent(value.ToString()), property.Name);
                 }
             }
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            var response = await _client.PostAsync("https://localhost:7196/api/Meetings", multipartContent);
+            var response = await _client.PostAsync($"https://localhost:7196/api/Meetings/{userId}", multipartContent);
 
             if (!response.IsSuccessStatusCode)
             {

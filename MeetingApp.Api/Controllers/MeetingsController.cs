@@ -10,21 +10,19 @@ namespace MeetingApp.Api.Controllers
     [Authorize]
     public class MeetingsController(IMeetingService meetingService, FileService fileService) : PrivateController
     {
-        [HttpGet]
-        public async Task<IActionResult> GetMeetings()
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetMeetings(int id)
         {
             var userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
             return ActionResultInstance(await meetingService.GetAllByUserIdAsync(userId));
         }
 
-        [HttpPost]
+        [HttpPost("{id}")]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> CreateMeeting([FromForm] CreateMeetingDto request)
+        public async Task<IActionResult> CreateMeeting(int id, [FromForm] CreateMeetingDto request)
         {
-            var userId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-
-            return ActionResultInstance(await meetingService.CreateAsync(userId, request));
+            return ActionResultInstance(await meetingService.CreateAsync(id, request));
         }
 
         [HttpPut]
