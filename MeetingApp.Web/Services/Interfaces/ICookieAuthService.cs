@@ -1,10 +1,11 @@
-﻿using MeetingApp.Web.ViewModels;
+﻿using MeetingApp.Web.Models;
+using MeetingApp.Web.ViewModels;
 
 namespace MeetingApp.Web.Services.Interfaces;
 
 public interface ICookieAuthService
 {
-    Task SignInAsync(LoginViewModel login, bool rememberMe);
+    Task<ServiceResult<TokenDto>> SignInAsync(LoginViewModel login, bool rememberMe);
 
     Task UpdateAccessTokenAsync(string accessToken);
 

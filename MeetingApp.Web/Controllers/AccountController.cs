@@ -53,7 +53,16 @@ namespace MeetingApp.Web.Controllers
                 return View(request);
             }
 
-            await _cookieAuthService.SignInAsync(request, true);
+            var response = await _cookieAuthService.SignInAsync(request, true);
+
+            if (response.ErrorMessage is not null)
+            {
+                foreach (var item in response.ErrorMessage)
+                {
+                    ModelState.AddModelError("", item);
+                }
+                return View(request);
+            }
 
             return RedirectToAction("GetUserMeetings", "Home");
         }

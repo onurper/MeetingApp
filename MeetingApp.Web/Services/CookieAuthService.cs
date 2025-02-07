@@ -14,12 +14,12 @@ namespace MeetingApp.Web.Services
         IHttpClientFactory _httpClientFactory
     ) : ICookieAuthService
     {
-        public async Task SignInAsync(LoginViewModel login, bool rememberMe)
+        public async Task<ServiceResult<TokenDto>> SignInAsync(LoginViewModel login, bool rememberMe)
         {
             var loginResponse = await LoginAsync(login);
 
             if (loginResponse.ErrorMessage is not null)
-                return;
+                return loginResponse;
 
             var token = loginResponse.Data!.AccessToken;
 
@@ -37,6 +37,8 @@ namespace MeetingApp.Web.Services
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             await CookieSignInAsync(authProperties, claimsIdentity);
+
+            return loginResponse;
         }
 
         private async Task CookieSignInAsync(AuthenticationProperties authProperties, ClaimsIdentity claimsIdentity)
