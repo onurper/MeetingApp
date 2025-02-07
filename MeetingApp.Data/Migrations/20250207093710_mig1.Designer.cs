@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MeetingApp.Data.Migrations
 {
     [DbContext(typeof(MeetingDbContext))]
-    [Migration("20250206153117_mig1")]
+    [Migration("20250207093710_mig1")]
     partial class mig1
     {
         /// <inheritdoc />

@@ -1,0 +1,2 @@
+﻿namespace MeetingApp.Web.ViewModels;
+public record UpdateUserViewModel(string? Name, string? Surname, string? Email, string? Phone, string? Password, IFormFile? ProfileImageFile, string ProfileImagePath);

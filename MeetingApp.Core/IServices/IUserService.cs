@@ -5,5 +5,7 @@ namespace MeetingApp.Core.IServices;
 
 public interface IUserService
 {
-    Task<ServiceResult<User>> UserRegister(UserDto request);
+    Task<ServiceResult<User>> GetUserByIdAsync(int id);
+    Task<ServiceResult<User>> UserRegisterAsync(UserDto request);
+    Task<ServiceResult<EmptyDto>> UserUpdateAsync(int id, UpdateUserDto request);
 }

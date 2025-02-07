@@ -1,11 +1,15 @@
 ﻿using FluentValidation;
 using MeetingApp.Web.Constants;
+using MeetingApp.Web.Helpers;
 using MeetingApp.Web.Models;
 using MeetingApp.Web.Services.Interfaces;
 using MeetingApp.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.Security.Claims;
+using System.Text;
 
 namespace MeetingApp.Web.Controllers
 {
@@ -115,6 +119,50 @@ namespace MeetingApp.Web.Controllers
             }
 
             return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Profile()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var response = await _client.GetAsync($"https://localhost:7196/api/Users/{userId}");
+
+            var resultJsonData = await response.Content.ReadAsStringAsync();
+            var values = JsonConvert.DeserializeObject<ServiceResult<UpdateUserViewModel>>(resultJsonData);
+            return View(values.Data);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateUser(UpdateUserViewModel request)
+        {
+            using var multipartContent = new MultipartFormDataContent();
+
+            foreach (var property in request.GetType().GetProperties())
+            {
+                var value = property.GetValue(request);
+                if (value == null) continue;
+
+                if (value is IFormFile file)
+                {
+                    var fileContent = new StreamContent(file.OpenReadStream());
+                    fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+                    multipartContent.Add(fileContent, property.Name, file.FileName);
+                }
+                else
+                {
+                    multipartContent.Add(new StringContent(value.ToString()), property.Name);
+                }
+            }
+
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var response = await _client.PutAsync($"https://localhost:7196/api/Users/{userId}", multipartContent);
+
+            var resultJsonData = await response.Content.ReadAsStringAsync();
+            var values = JsonConvert.DeserializeObject<ServiceResult<EmptyDto>>(resultJsonData);
+
+            return RedirectToAction("Profile", "Account");
         }
     }
 }

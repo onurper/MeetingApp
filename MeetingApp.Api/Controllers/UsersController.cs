@@ -10,9 +10,24 @@ namespace MeetingApp.Api.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> CreateUser([FromForm] UserDto requestCreateUserDto)
         {
-            await userService.UserRegister(requestCreateUserDto);
+            await userService.UserRegisterAsync(requestCreateUserDto);
 
             return Ok();
+        }
+
+        [HttpPut("{id}")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateUser(int id, [FromForm] UpdateUserDto requestUpdateUserDto)
+        {
+            await userService.UserUpdateAsync(id, requestUpdateUserDto);
+            return Ok();
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUser(int id)
+        {
+            var result = await userService.GetUserByIdAsync(id);
+            return ActionResultInstance(result);
         }
     }
 }

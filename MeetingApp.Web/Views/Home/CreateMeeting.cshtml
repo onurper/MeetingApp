@@ -27,7 +27,7 @@
 
             <div class="mb-3">
                 <label asp-for="Document" class="form-label fw-bold">Doküman Yükle</label>
-                <input type="file" class="form-control" asp-for="Document" accept=".pdf,.docx,.xlsx,.pptx">
+                <input type="file" class="form-control" asp-for="Document"@*  accept=".pdf,.docx,.xlsx,.pptx" *@>
                 <span class="text-danger" asp-validation-for="Document"></span>
             </div>
 

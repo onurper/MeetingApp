@@ -2,6 +2,7 @@
 using MeetingApp.Data.Extensions;
 using MeetingApp.Service.Extensions;
 using MeetingApp.Service.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,13 +27,20 @@ if (app.Environment.IsDevelopment())
 
 using (var scope = app.Services.CreateScope())
 {
+    var dbContext = scope.ServiceProvider.GetRequiredService<MeetingDbContext>();
+    dbContext.Database.Migrate();
+    dbContext.EnsureDatabaseSetup();
+}
+
+using (var scope = app.Services.CreateScope())
+{
     var serviceProvider = scope.ServiceProvider;
     var meetingCleanupService = serviceProvider.GetRequiredService<MeetingCleanupService>();
 
     var recurringJobManager = serviceProvider.GetRequiredService<IRecurringJobManager>();
     recurringJobManager.AddOrUpdate(
         "delete-cancelled-meetings",
-        () => meetingCleanupService.DeleteCancelledMeetings(), Cron.Daily);
+        () => meetingCleanupService.DeleteCancelledMeetings(), Cron.Minutely);
 }
 
 app.UseExceptionHandler(x => { });

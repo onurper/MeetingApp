@@ -24,18 +24,15 @@ public class MeetingDbContext : DbContext
         modelBuilder.Entity<DeletedMeetings>()
             .Property(e => e.DeletedAt)
             .HasDefaultValueSql("GETDATE()");
-
-        ApplyDatabaseSetup(modelBuilder);
     }
 
-    private static void ApplyDatabaseSetup(ModelBuilder modelBuilder)
+    public void EnsureDatabaseSetup()
     {
-        modelBuilder.HasDbFunction(() => CreateDeletedMeetingsTable());
-
-        modelBuilder.HasDbFunction(() => CreateDeleteTrigger());
+        this.Database.ExecuteSqlRaw(CreateDeletedMeetingsTable());
+        this.Database.ExecuteSqlRaw(CreateDeleteTrigger());
     }
 
-    public static string CreateDeletedMeetingsTable()
+    private static string CreateDeletedMeetingsTable()
     {
         return @"
             IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'DeletedMeetings')
@@ -54,36 +51,24 @@ public class MeetingDbContext : DbContext
                 );
             END;";
     }
-
     public static string CreateDeleteTrigger()
     {
         return @"
-            CREATE TRIGGER trg_AfterDeleteMeetings    ON  Meetings    AFTER
-DELETE AS
-BEGIN
-	SET NOCOUNT ON;
-	IF NOT EXISTS (SELECT * FROM INSERTED) AND EXISTS (SELECT * FROM DELETED)
-	BEGIN
-		INSERT INTO DeletedMeetings (
-			MeetingId
-			,UserId
-			,Title
-			,STATUS
-			,Description
-			,DocumentPath
-			,StartDate
-			,EndDate
-			,DeletedAt
-			) SELECT Id
-			,UserId
-			,Title
-			,STATUS
-			,Description
-			,DocumentPath
-			,StartDate
-			,EndDate
-			,GETDATE() FROM DELETED;
-	END
-END";
+        IF NOT EXISTS (SELECT * FROM sys.triggers WHERE name = 'trg_AfterDeleteMeetings')
+        BEGIN
+            EXEC sp_executesql N'
+            CREATE TRIGGER trg_AfterDeleteMeetings 
+            ON Meetings
+            AFTER DELETE
+            AS
+            BEGIN
+                SET NOCOUNT ON;
+                INSERT INTO DeletedMeetings (
+                    MeetingId, UserId, Title, Status, Description, DocumentPath, StartDate, EndDate, DeletedAt
+                ) 
+                SELECT Id, UserId, Title, Status, Description, DocumentPath, StartDate, EndDate, GETDATE() 
+                FROM DELETED;
+            END';
+        END";
     }
 }

@@ -1,17 +1,27 @@
 ﻿using MeetingApp.Core;
 using MeetingApp.Core.IRepositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace MeetingApp.Service.Services;
 
-public class MeetingCleanupService(IMeetingRepository meetingRepository, IUnitOfWork unitOfWork)
+public class MeetingCleanupService(IMeetingRepository meetingRepository, IUnitOfWork unitOfWork, MeetingDbContext _context)
 {
-    public void DeleteCancelledMeetings()
-    {
-        var cancelledMeetings = meetingRepository
-            .Where(m => m.Status == false)
-            .ToList();
+    //public async Task DeleteCancelledMeetings()
+    //{
 
-        meetingRepository.RemoveRange(cancelledMeetings);
-        unitOfWork.SaveChangesAsync();
+    //    var cancelledMeetings = await meetingRepository
+    //        .Where(m => m.Status == false)
+    //        .ToListAsync();
+
+    //    if (cancelledMeetings.Any())
+    //    {
+    //        meetingRepository.RemoveRange(cancelledMeetings);
+    //        await unitOfWork.SaveChangesAsync();
+    //    }
+    //}
+    public Task DeleteCancelledMeetings()
+    {
+        return _context.Database.ExecuteSqlRawAsync("DELETE FROM Meetings WHERE Status = 0;");
     }
+
 }
